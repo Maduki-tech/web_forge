@@ -2,6 +2,7 @@ use std::{fs::File, io::Read};
 
 mod dom;
 mod html;
+mod css;
 
 fn main() {
     let html_input = std::env::args().nth(1).expect("please provide a file name");
