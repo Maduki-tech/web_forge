@@ -1,11 +1,21 @@
-pub mod dom;
+use std::{fs::File, io::Read};
+
+mod dom;
+mod html;
 
 fn main() {
-    let text = dom::text("Hello world!".to_string());
-    let text2 = dom::text("Hello world!2".to_string());
+    let html_input = std::env::args().nth(1).expect("please provide a file name");
+    let html = read(html_input);
+    let root = html::parse(html);
 
-    let elem = dom::elem("div".to_string(), dom::AttrMap::new(), vec![text]);
-    let elem2 = dom::elem("div2".to_string(), dom::AttrMap::new(), vec![elem, text2]);
+    println!("{:#?}", root);
+}
 
-    println!("{:#?}", elem2);
+fn read(file: String) -> String {
+    let mut input = String::new();
+    File::open(file)
+        .unwrap()
+        .read_to_string(&mut input)
+        .unwrap();
+    input
 }
