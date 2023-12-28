@@ -34,6 +34,15 @@ enum Value {
     ColorValue(Color),
 }
 
+impl Value {
+    pub fn to_px(&self) -> f32 {
+        match *self {
+            Value::Length(f, Unit::Px) => f,
+            _ => 0.0,
+        }
+    }
+}
+
 #[derive(Debug)]
 enum Unit {
     Px,
@@ -60,8 +69,6 @@ impl Selector {
     }
 }
 
-
-
 pub fn parse(source: String) -> Stylesheet {
     let mut parser = Parser {
         pos: 0,
@@ -77,7 +84,7 @@ struct Parser {
     input: String,
 }
 
-impl Parser{
+impl Parser {
     fn parse_rules(&mut self) -> Vec<Rule> {
         let mut rules = Vec::new();
         loop {
@@ -98,38 +105,47 @@ impl Parser{
         }
     }
 
+    /// Parse a comma-separated list of selectors.
     fn parse_selectors(&mut self) -> Vec<Selector> {
+        let mut selectors = Vec::new();
+        loop {
+            selectors.push(Selector::Simple(self.parse_simple_selector()));
+            self.consume_whitespace();
+            match self.next_char() {
+                ',' => {
+                    self.consume_char();
+                    self.consume_whitespace();
+                }
+                '{' => break,
+                c => panic!("Unexpected character {} in selector list", c),
+            }
+        }
+        // Return selectors with highest specificity first, for use in matching.
+        selectors.sort_by(|a, b| b.specificity().cmp(&a.specificity()));
+        selectors
     }
 
     fn parse_simple_selector(&mut self) -> SimpleSelector {
+
     }
 
-    fn parse_declarations(&mut self) -> Vec<Declaration> {
-    }
+    fn parse_declarations(&mut self) -> Vec<Declaration> {}
 
-    fn parse_declaration(&mut self) -> Declaration {
-    }
+    fn parse_declaration(&mut self) -> Declaration {}
 
-    fn parse_value(&mut self) -> Value {
-    }
+    fn parse_value(&mut self) -> Value {}
 
-    fn parse_length(&mut self) -> Value {
-    }
+    fn parse_length(&mut self) -> Value {}
 
-    fn parse_float(&mut self) -> f32 {
-    }
+    fn parse_float(&mut self) -> f32 {}
 
-    fn parse_unit(&mut self) -> Unit {
-    }
+    fn parse_unit(&mut self) -> Unit {}
 
-    fn parse_color(&mut self) -> Color {
-    }
+    fn parse_color(&mut self) -> Color {}
 
-    fn parse_hex_pair(&mut self) -> u8 {
-    }
+    fn parse_hex_pair(&mut self) -> u8 {}
 
-    fn parse_identifier(&mut self) -> String {
-    }
+    fn parse_identifier(&mut self) -> String {}
 
     fn consume_whitespace(&mut self) {
         self.consume_while(char::is_whitespace);
@@ -161,7 +177,6 @@ impl Parser{
     fn eof(&self) -> bool {
         self.pos >= self.input.len()
     }
-
 }
 
 fn valid_identifier_char(c: char) -> bool {
@@ -170,5 +185,3 @@ fn valid_identifier_char(c: char) -> bool {
         _ => false,
     }
 }
-
-
